@@ -1,0 +1,138 @@
+https://www.mongodb.org/dl/win32/x86_64-2008plus-ssl
+===>Data Source : MongoDB
+ npm install mongoose
+
+http://localhost:3000/bangkingmongodb/accounts       : GET     => GET ALL ACCOUNTS
+http://localhost:3000/bangkingmongodb/accounts/101   : GET     => GET ACCOUNT  WITH ACCNO
+http://localhost:3000/bangkingmongodb/accounts/101   : PUT     => UPDATE ACCOUNT WITH ACCNO
+http://localhost:3000/bangkingmongodb/accounts/103   : DELETE  => DELETE ACCOUNT WITH ACCNO
+http://localhost:3000/bangkingmongodb/accounts       : POST    => ADD ACCOUNT
+
+==>starting the mongodb server
+F:\softwares\mongodb-windows-x86_64-4.2.5\mongodb-win32-x86_64-windows-4.2.5\bin>
+start mongod --dbpath=f:\mongodbdata
+
+==> start the mongodb client
+F:\softwares\mongodb-windows-x86_64-4.2.5\mongodb-win32-x86_64-windows-4.2.5\bin>mongo
+
+==>Adding the routes in app.js
+var bankingMongoDBRouter = require('./routes/bankingmongodb');
+app.use('/bankingmongodb', bankingMongoDBRouter);
+
+==>bankingmongodb.js in routes folder
+var express = require('express');
+var mongoose=require("mongoose");
+var router = express.Router();
+
+
+var dbName = 'bank';
+var connectionString = 'mongodb://localhost:27017/'+dbName;
+
+//create a connection with mmongodb
+
+mongoose.connect(connectionString,function(err){
+    if(err)
+    return console.err(""+err);
+    console.log("Connection established with MongoDB");
+});
+
+
+
+var userSchema = new mongoose.Schema({
+  accno: Number,
+  name: String,
+  balance: Number,
+  doc: String,
+});
+
+
+var  Account=mongoose.model('account', userSchema);
+
+
+
+/* GET all Accounts */
+router.get('/accounts', function(req, res, next) {
+  
+     Account.find(function(err,data){
+        if(err)
+        return res.send(""+err);
+        res.json(data);
+     });
+
+  
+});
+
+
+/* GET Account by accno : */
+router.get('/accounts/:accno', function(req, res, next) {
+    var acNo=parseInt(req.params.accno);
+    
+    Account.findOne({accno:acNo},function(err,data){
+        if(err)
+        return res.send(""+err);
+        res.json(data);
+     });
+
+});
+  
+/* DELETE Account by accno : */
+router.delete('/accounts/:accno', function(req, res, next) {
+    
+    var acNo=parseInt(req.params.accno);
+    
+    
+    Account.remove({accno:acNo},function(err,data){
+        if(err)
+        return res.send(""+err);
+
+        Account.find(function(err,data){
+            if(err)
+            return res.send(""+err);
+            res.json(data);
+         });
+    
+        });    
+});
+  
+/* UPDATE Account by accno : */
+router.put('/accounts/:accno', function(req, res, next) {
+    
+    var acNo=parseInt(req.params.accno);
+    
+    Account.findOne({accno:acNo},function (error,account){
+        if(error)
+        return res.send(error);
+        
+        for (prop in req.body) {
+            account[prop] = req.body[prop];
+          }
+
+    account.save(function(err,result){
+            Account.find(function(err,data){
+                if(err)
+                return res.send(err);
+                res.json(data);
+               });
+        });
+       
+}); 
+   
+});
+
+
+/* ADD Account  */
+router.post('/accounts', function(req, res, next) {
+        
+    var account=new Account(req.body);
+
+    account.save(function(err,result){
+        Account.find(function(err,data){
+            if(err)
+            return res.send(err);
+            res.json(data);
+           });
+    });
+
+});
+
+module.exports = router;

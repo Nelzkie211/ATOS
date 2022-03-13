@@ -1,0 +1,15 @@
+{
+  "name": "coursecode3",
+  "version": "1.0.0",
+  "description": "this is sample",
+  "main": "index.js",
+  "scripts": {
+    "test": " "
+  },
+  "author": "skillsoft",
+  "license": "ISC",
+  "dependencies": {
+    "babel": "^6.23.0",
+    "react": "^17.0.2"
+  }
+}
