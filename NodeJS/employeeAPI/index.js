@@ -1,12 +1,13 @@
 const express = require('express')
 const bodyParser = require('body-parser')
+const cors = require('cors')
 const { mongoose } = require('./db.js')
 
 const EmployeeCntrl = require('./controllers/employeeController.js')
 
 const app = express()
 
-
+app.use(cors())
 app.use(bodyParser.json())
 app.use('/employee', EmployeeCntrl)
 
